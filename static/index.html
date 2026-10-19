@@ -1,0 +1,816 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SirJoe's Karaoke Syncro Songs</title>
+<link rel="icon" href="/favicon.png">
+<style>
+:root{--gold:#E9B949;--gold2:#B8841F;--silver:#C9D3E6;--ink:#0E2247;--cream:#FFF6DE;--red:#FF1A1A;--line:#2F4A80;--muted:#9FB0CE}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--cream);font:16px/1.45 "Trebuchet MS",system-ui,sans-serif;background:linear-gradient(180deg,#02112e 0%,#02112e 35%,#06224d 75%,#02112e 100%) fixed}
+[hidden]{display:none!important}
+#bg{position:fixed;inset:0;width:100%;height:100%;z-index:0}
+main{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:10px 16px 70px}
+.logo{display:block;width:min(580px,100%);margin:0 auto 4px;-webkit-mask-image:linear-gradient(#000 80%,transparent 100%),radial-gradient(ellipse 52% 75% at 50% 46%,#000 66%,transparent 100%);-webkit-mask-composite:source-in;mask-image:linear-gradient(#000 80%,transparent 100%),radial-gradient(ellipse 52% 75% at 50% 46%,#000 66%,transparent 100%);mask-composite:intersect}
+section{background:rgba(15,42,87,.9);border:2px solid var(--gold2);border-radius:22px;padding:18px;margin-bottom:16px;box-shadow:0 6px 22px rgba(0,0,0,.4)}
+h2{margin:0 0 6px;font-size:18px;color:var(--gold)}
+label{display:block;font-size:14px;color:var(--silver);margin:10px 0 4px}
+label.chk{display:flex;gap:8px;align-items:flex-start;margin-top:12px}
+input[type=text],select,textarea{width:100%;min-height:44px;padding:8px 12px;border:2px solid var(--line);border-radius:14px;background:#0A1B3D;color:var(--cream);font:inherit}
+::placeholder{color:#6F84AE}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--gold);border-color:var(--gold)}
+textarea{min-height:150px}
+input[type=file]{max-width:100%;font:inherit;color:var(--silver)}
+input[type=checkbox]{accent-color:var(--gold);margin-top:4px}
+button{min-height:46px;padding:8px 22px;border:0;border-radius:999px;background:linear-gradient(180deg,#F6D277,#C8932A);color:#2A1A00;font:inherit;font-weight:700;cursor:pointer;margin:12px 8px 0 0}
+button.alt{background:transparent;color:var(--gold);border:2px solid var(--gold2)}
+button:disabled{opacity:.5;cursor:wait}
+button.sm{min-height:40px;padding:6px 14px;font-size:14px;margin-top:8px}
+button.ic{min-height:40px;min-width:44px;padding:4px 10px;margin:0;font-size:18px}
+.hint{font-size:13px;color:var(--muted);margin:8px 0 0}
+.lk{display:inline-block;margin-top:14px;font-weight:600;color:var(--gold)}
+#info{font-size:14px;color:#FFD36B;margin-top:6px}
+#status{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:50;max-width:min(92vw,640px);padding:10px 20px;border-radius:999px;background:#0A1B3D;border:2px solid var(--gold);color:#FFD36B;font-weight:600;cursor:pointer;box-shadow:0 6px 22px rgba(0,0,0,.5)}
+#status:empty{display:none}
+.rh{margin:16px 0 0;font-weight:700;color:var(--gold)}
+.item{display:flex;gap:12px;align-items:center;padding:10px;margin-top:10px;border:2px solid var(--line);border-radius:16px;background:#0A1B3D}
+.item img{width:112px;height:63px;object-fit:cover;border-radius:8px;flex:none;background:#1B3A73}
+.item .meta{flex:1;min-width:0}
+.item .meta b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item .meta span{display:block;font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item .acts{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+.item .acts button{margin:0}
+@media(max-width:600px){.item{flex-wrap:wrap}.item .acts{justify-content:flex-start}}
+.cl-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:2px 16px}
+#stage{position:relative}
+#pbar{display:flex;align-items:center;gap:10px;padding:8px 14px;margin-bottom:10px;border-radius:999px;background:#0A1B3D;border:2px solid var(--gold2);transition:opacity .35s}
+#pbar #seek{flex:1;min-width:60px;accent-color:#E9B949}
+#pbar #mv{width:84px;accent-color:#E9B949}
+#tm{font-size:13px;color:var(--silver);white-space:nowrap;font-variant-numeric:tabular-nums}
+#cd{visibility:hidden;display:flex;align-items:center;gap:12px;margin:0 0 10px;padding:8px 16px;border-radius:999px;background:#0A1B3D;border:3px solid var(--gold2)}
+#cdlab{font-weight:600;font-size:14px;color:var(--silver);white-space:nowrap}
+#cdtrack{flex:1;height:18px;border-radius:9px;background:#1B3A73;overflow:hidden}
+#cdbar{height:100%;width:100%;background:linear-gradient(90deg,#E9B949,#FF8A1A,#FF1A1A);clip-path:inset(0 0 0 0 round 9px)}
+#cdnum{min-width:30px;text-align:center;font-size:30px;line-height:1;font-weight:700;color:#FFD36B}
+#kar{position:relative;background:#FFF6DE;border:3px solid var(--gold);border-radius:20px;font-size:26px;line-height:1.6;text-align:center;padding:18px;min-height:150px;max-height:320px;overflow-y:auto;color:var(--ink)}
+.w{--p:0%;color:transparent;background:linear-gradient(90deg,#FF1A1A var(--p),#0E2247 var(--p));-webkit-background-clip:text;background-clip:text}
+#kar .l{opacity:.6;padding-top:8px;cursor:pointer;border-radius:12px}#kar .l.cur{opacity:1}#kar .l.sel{outline:2px dashed #B8841F}#au{display:none;width:100%;max-height:68vh;background:#000;border-radius:14px;margin:6px 0}#stage.isvideo #au{display:block}#stage.isvideo #kar,#stage.isvideo #cd{display:none}#stage:fullscreen #au{flex:1;min-height:0;max-height:none;object-fit:contain}
+#kar .w.wsel{text-decoration:underline;text-decoration-color:#B8841F;text-decoration-thickness:3px}
+#ed{margin:14px 0;border:2px solid var(--gold2);border-radius:16px;padding:10px 14px;background:rgba(8,24,56,.6)}#ed summary{cursor:pointer;font-weight:700;color:#FFD36B}
+.edrow select{width:auto}.edrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}#tl{width:100%;display:block;border-radius:12px;border:2px solid #26407A;touch-action:none;cursor:crosshair;outline:none}#tl:focus{border-color:var(--gold)}
+#stage:fullscreen{display:flex;flex-direction:column;padding:18px 28px 26px;background:linear-gradient(180deg,#02112e,#06224d)}
+#stage:fullscreen #kar{flex:1;min-height:0;max-height:none;font-size:clamp(34px,5.2vw,88px);line-height:1.5}
+#stage:fullscreen #cd{margin-bottom:14px}
+#stage.hide-ui #pbar{opacity:0;pointer-events:none}
+#stage.hide-ui:fullscreen{cursor:none}
+audio{display:none}
+.pill{display:inline-block;padding:3px 10px;margin:3px 6px 3px 0;border-radius:999px;font-size:13px;border:2px solid var(--line);background:#0A1B3D}
+.pill.ok{border-color:#3FA66B;color:#9FE2B8}.pill.no{border-color:#C0563B;color:#FFB4A0}
+#offbanner{margin-bottom:12px;padding:10px 14px;border-radius:14px;background:#3A2A0A;border:2px solid var(--gold);color:#FFD36B}
+.pl-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.pl-row select{flex:1;min-width:160px}
+.pl-row button{margin:0}
+.num{width:28px;text-align:center;color:var(--gold);font-weight:700;flex:none}
+.item.playing{border-color:var(--gold)}
+#kar .note{font-size:18px;color:#6B6390;padding:24px 8px}
+</style></head><body>
+<svg id="bg" viewBox="0 0 880 560" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+<defs><g id="n" fill="currentColor" stroke="currentColor" stroke-linecap="round"><ellipse rx="10" ry="7.5" transform="rotate(-20)" stroke="none"/><path d="M9 -3V-42q16 6 11 24" fill="none" stroke-width="3.5"/></g><polygon id="s" points="0.0,-10.0 2.5,-3.4 9.5,-3.1 4.0,1.3 5.9,8.1 0.0,4.2 -5.9,8.1 -4.0,1.3 -9.5,-3.1 -2.5,-3.4" fill="currentColor"/></defs>
+<g stroke="#E9B949" stroke-opacity=".13" stroke-width="2"><path d="M0 30H880M0 42H880M0 54H880M0 66H880M0 78H880M0 262H880M0 274H880M0 286H880M0 298H880M0 310H880M0 470H880M0 482H880M0 494H880M0 506H880M0 518H880"/></g>
+<use href="#n" transform="translate(60 72)" style="color:#E9B949;opacity:.45"/><use href="#n" transform="translate(135 54)" style="color:#C9D3E6;opacity:.35"/>
+<use href="#n" transform="translate(750 66)" style="color:#E9B949;opacity:.45"/><use href="#n" transform="translate(820 48)" style="color:#C9D3E6;opacity:.35"/>
+<use href="#n" transform="translate(80 512)" style="color:#C9D3E6;opacity:.35"/><use href="#n" transform="translate(160 492)" style="color:#E9B949;opacity:.45"/>
+<use href="#n" transform="translate(705 508)" style="color:#E9B949;opacity:.45"/><use href="#n" transform="translate(790 488)" style="color:#C9D3E6;opacity:.35"/>
+<use href="#s" transform="translate(120 150) scale(1.4)" style="color:#E9B949;opacity:.5"/><use href="#s" transform="translate(770 170)" style="color:#E9B949;opacity:.4"/>
+<use href="#s" transform="translate(60 420)" style="color:#C9D3E6;opacity:.35"/><use href="#s" transform="translate(830 400) scale(1.5)" style="color:#E9B949;opacity:.4"/>
+</svg>
+<main>
+<img class="logo" src="/logo.jpg" alt="SirJoe's Karaoke Syncro Songs">
+
+<p style="text-align:center;margin:0 0 10px;font-size:13px;color:var(--muted)">Versione 3.7 · importa file, playlist, videoclip, offline</p>
+<div id="diagbanner" hidden style="margin:0 0 12px;padding:12px 16px;border-radius:14px;background:#5a1020;border:2px solid #ff6b6b;color:#fff"></div>
+<div id="offbanner" hidden>📴 Sei offline: la ricerca e i download da internet non sono disponibili. Libreria, playlist, importazione, sincronizzazione e salvataggio funzionano normalmente (se i modelli sono già scaricati).</div>
+
+<section>
+<h2>📥 Importa file già pronti</h2>
+<p class="hint" style="margin-top:0">Audio, video, karaoke (LRC, ASS, SRT, VTT, KAR/MIDI, CDG), JSON e ZIP: seleziona anche più file insieme. File con lo stesso nome (es. <i>brano.mp3</i> + <i>brano.lrc</i>) vengono abbinati da soli e finiscono nella libreria.</p>
+<button id="impbtn" type="button">📥 Importa file…</button>
+<input id="impf" type="file" multiple hidden>
+<div id="impres" class="hint"></div>
+</section>
+
+<section>
+<h2>🎤 Libreria e playlist</h2>
+<div class="pl-row"><select id="plsel" aria-label="Playlist"></select>
+<button class="alt sm" id="plnew" type="button">➕ Nuova</button><button class="alt sm" id="plren" type="button">✏ Rinomina</button><button class="alt sm" id="pldel" type="button">🗑 Elimina</button></div>
+<div class="rh">Nella playlist</div><div id="plitems"></div>
+<div><button id="plplay" type="button">▶ Riproduci playlist</button><button id="plfs" class="alt" type="button">⛶ Riproduci a schermo intero</button></div>
+<div class="rh">Tutti i brani della libreria</div><div id="libpath" class="hint"></div>
+<button class="alt sm" id="selft" type="button">🔧 Controlla libreria e playlist</button><div id="selfres" class="hint"></div>
+<div id="libitems"></div>
+</section>
+
+<section>
+<h2>🔎 Cerca video, audio e testi</h2>
+<label for="q">Titolo, artista o canale (oppure incolla il link di un canale, una playlist o una pagina)</label>
+<input id="q" type="text" placeholder="Es.: titolo della canzone e artista">
+<label for="src">Dove cercare i video/audio</label>
+<select id="src"><option value="youtube">YouTube</option><option value="soundcloud">SoundCloud</option><option value="url">Link di un canale, una playlist o un sito</option></select>
+<div><button id="sm" type="button">🔎 Video/audio</button><button id="sl" type="button">🔎 Testi</button><button id="sa" type="button">🔎 Cerca tutto</button></div>
+<div><span class="hint">Cerca anche sul web:</span> <button class="alt sm" id="gg" type="button">Google</button><button class="alt sm" id="gn" type="button">Genius</button><button class="alt sm" id="gy" type="button">YouTube</button></div>
+<div id="rm"></div><div id="rl"></div>
+</section>
+
+<section>
+<h2>🎵 Brano e testo</h2>
+<label for="f">Brano o video (MP3, WAV, M4A, MP4, MKV, MOV, WEBM…) con la voce</label><input id="f" type="file" accept="audio/*,video/*,.mkv,.flac,.opus">
+<label for="url">Oppure incolla il link di un video (YouTube e molti altri siti)</label>
+<input id="url" type="text" placeholder="https://…">
+<div><button id="fetch" class="alt" type="button">⬇ Scarica audio e testo dal link</button> <a id="dla" class="lk" hidden>Salva l'audio (WAV)</a></div>
+<div id="info"></div>
+<button id="usesubs" class="alt" type="button" hidden>Usa i sottotitoli del video come testo</button>
+<label class="chk"><input id="getclip" type="checkbox" checked> Scarica anche il videoclip (sfondo dei video salvati)</label>
+<p class="hint">Usa solo video tuoi o di cui hai i diritti: scaricare da certi siti può violare i loro termini e il diritto d'autore.</p>
+<label for="t">Testo (una riga per verso)</label><textarea id="t"></textarea>
+<button id="ftbtn" class="alt sm" type="button">📄 Carica testo da file (.txt, .lrc, .srt…)</button>
+<input id="ft" type="file" accept=".txt,.lrc,.srt,.vtt,.ass,.sub,text/plain" hidden>
+<label for="ti">Titolo</label><input id="ti" type="text"><label for="ar">Artista</label><input id="ar" type="text">
+<label for="lang">Lingua del testo</label>
+<select id="lang"><option value="it">Italiano</option><option value="en">Inglese</option><option value="es">Spagnolo</option><option value="fr">Francese</option><option value="de">Tedesco</option></select>
+<label for="mdl">Accuratezza</label>
+<select id="mdl"><option value="base">Veloce (consigliata con voce isolata)</option><option value="small">Standard (più precisa, più lenta)</option><option value="medium">Alta (molto più lenta)</option></select>
+<label class="chk"><input id="sep" type="checkbox" checked> Isola la voce con Demucs (consigliato per brani con la musica: più preciso, ma più lento)</label>
+<label for="qual">Qualità della base senza voce (applicata al salvataggio: la sincronia resta veloce)</label>
+<select id="qual"><option value="high">Alta (consigliata)</option><option value="max">Massima (molto più lenta)</option><option value="standard">Standard (veloce)</option></select>
+<button id="go" type="button">✨ Sincronizza</button>
+</section>
+
+<section>
+<h2>📶 Uso offline</h2>
+<p class="hint" style="margin-top:0">L'app gira sul tuo computer: dopo la prima preparazione puoi usarla senza internet (restano esclusi ricerca e download da link).</p>
+<div id="stpills"></div>
+<label class="chk"><input id="prepmed" type="checkbox"> Scarica anche il modello «Alta accuratezza» (circa 1,5 GB)</label>
+<button id="prep" class="alt" type="button">⬇ Prepara l'uso offline (modelli)</button>
+<div id="preplog" class="hint"></div>
+</section>
+
+<section>
+<h2>🗑 Cancella</h2>
+<p class="hint" style="margin-top:0">Scegli cosa togliere, oppure cancella tutto.</p>
+<div class="cl-grid">
+<label class="chk"><input type="checkbox" class="cl" value="audio"> Brano/video caricato (e la sincronizzazione)</label>
+<label class="chk"><input type="checkbox" class="cl" value="text"> Testo</label>
+<label class="chk"><input type="checkbox" class="cl" value="meta"> Titolo e artista</label>
+<label class="chk"><input type="checkbox" class="cl" value="search"> Risultati della ricerca</label>
+<label class="chk"><input type="checkbox" class="cl" value="result"> Sincronizzazione ottenuta</label>
+<label class="chk"><input type="checkbox" class="cl" value="lib"> Tutta la libreria e le playlist</label>
+</div>
+<div><button id="clsel" class="alt" type="button">Cancella i selezionati</button><button id="clall" class="alt" type="button">🗑 Cancella tutto</button></div>
+</section>
+
+<section id="res" hidden>
+<div id="stage">
+<div id="pbar">
+<button id="pp" class="ic" type="button" title="Play / Pausa (barra spaziatrice)">▶</button>
+<button id="st" class="ic" type="button" title="Stop">⏹</button>
+<button id="rs" class="ic" type="button" title="Ricomincia dall'inizio">⟲</button>
+<button id="pv" class="ic" type="button" title="Brano precedente" disabled>⏮</button><button id="nx" class="ic" type="button" title="Brano successivo" disabled>⏭</button>
+<input id="seek" type="range" min="0" max="1000" value="0" aria-label="Posizione nel brano">
+<span id="tm">0:00 / 0:00</span>
+<span aria-hidden="true">🔊</span><input id="mv" type="range" min="0" max="100" value="100" aria-label="Volume">
+<button id="fs" class="ic" type="button" title="Schermo intero (F)">⛶</button>
+</div>
+<div id="cd"><span id="cdlab"></span><div id="cdtrack"><div id="cdbar"></div></div><span id="cdnum"></span></div>
+<video id="au" playsinline></video>
+<div id="kar"></div>
+</div>
+<audio id="av"></audio>
+<p class="hint">Dove le parole non vanno a tempo: tocca la riga o la parola nel karaoke e spostala (0.1 s a ogni tocco), oppure apri «Allinea le parole a mano» qui sotto per trascinarle sulla timeline.</p>
+<div><button class="alt sm" id="n1" type="button">Riga −0.1</button><button class="alt sm" id="n2" type="button">Riga +0.1</button>
+<button class="alt sm" id="n3" type="button">Da qui −0.1</button><button class="alt sm" id="n4" type="button">Da qui +0.1</button>
+<button class="alt sm" id="n5" type="button">Tutto −0.1</button><button class="alt sm" id="n6" type="button">Tutto +0.1</button></div>
+<details id="ed">
+<summary>✋ Allinea le parole a mano (timeline: trascina, allunga, marca a tempo)</summary>
+<div class="edrow">
+<label for="edz" style="margin:0">Secondi visibili</label>
+<select id="edz"><option value="5">5</option><option value="10" selected>10</option><option value="20">20</option><option value="40">40</option></select>
+<label class="chk" style="margin:0"><input id="edfol" type="checkbox"> Sposta insieme tutte le parole seguenti (altrimenti si spostano solo quelle che si scontrano)</label>
+<button class="alt sm" id="edun" type="button" title="Annulla (Ctrl+Z)">↶ Annulla</button><button class="alt sm" id="edre" type="button" title="Ripeti (Ctrl+Y)">↷ Ripeti</button>
+</div>
+<canvas id="tl" tabindex="0" aria-label="Timeline delle parole"></canvas>
+<input id="edsc" type="range" min="0" max="1000" value="0" aria-label="Scorri la timeline" style="width:100%;accent-color:#E9B949">
+<div id="edinfo" class="hint">Tocca una parola del testo o della timeline per selezionarla.</div>
+<div class="edrow">
+<button class="alt sm" id="edpw" type="button">‹ Parola</button><button class="alt sm" id="ednw" type="button">Parola ›</button>
+<button class="alt sm" id="edss" type="button" title="Imposta l'inizio della parola al punto in cui sta suonando il brano">Inizio = qui</button>
+<button class="alt sm" id="edse" type="button">Fine = qui</button>
+<button class="alt sm" id="edsl" type="button" title="Sposta tutta la riga in modo che inizi qui">Riga inizia qui</button>
+<button class="alt sm" id="edm" type="button">−0.05 s</button><button class="alt sm" id="edp" type="button">+0.05 s</button>
+</div>
+<div class="edrow"><button class="sm" id="edtap" type="button">🎯 Marca a tempo</button>
+<button id="edtapb" type="button" hidden style="font-size:20px;padding:12px 28px">TAP (barra spaziatrice)</button></div>
+<p class="hint"><b>Come si usa:</b> trascina una parola per spostarla (se urta le vicine, le spinge), tira il bordo sinistro o destro per cambiarne inizio e fine, clicca sullo sfondo per portare il brano in quel punto. Con la frecce ← → muovi la parola selezionata di 0,02 s (Maiusc: 0,1 s; Alt: sposta la fine). <b>Marca a tempo:</b> avvia il brano e premi la barra spaziatrice nel momento esatto in cui inizia ogni parola. Le modifiche valgono per i video e i file che salvi dopo.</p>
+<button class="alt" id="edsave" type="button">💾 Salva le modifiche in libreria</button>
+</details>
+<div id="mixrow" hidden style="margin-top:12px"><label for="vol" style="margin:0">Voce originale: <b id="volv">0%</b> <span style="font-size:12px">(0% = base karaoke, senza voce)</span></label>
+<input id="vol" type="range" min="0" max="100" value="0" style="width:100%;accent-color:#E9B949"></div>
+<button id="rmv" class="alt" type="button" hidden>🎤 Rimuovi la voce originale</button>
+<h2 style="margin-top:18px">💾 Salva</h2>
+<label for="exfmt">Salva il karaoke sincronizzato come</label>
+<select id="exfmt">
+<optgroup label="Audio (base karaoke)"><option value="mp3">MP3</option><option value="wav">WAV</option><option value="flac">FLAC</option></optgroup>
+<optgroup label="Video con testo e conto alla rovescia"><option value="mp4">MP4</option><option value="avi">AVI</option></optgroup>
+<optgroup label="Formati karaoke e testo"><option value="lrc">LRC (parola per parola)</option><option value="lrc-line">LRC (solo righe)</option><option value="ass">ASS (karaoke con colori)</option><option value="srt">SRT</option><option value="vtt">VTT</option><option value="txt">TXT (solo testo)</option><option value="json">JSON</option></optgroup>
+</select>
+<label for="bgsel">Sfondo dei video MP4/AVI</label>
+<select id="bgsel"><option value="auto">Videoclip del brano (se c'è) altrimenti animazione casuale</option><option value="anim">Animazione casuale</option><option value="plain">Tinta unita</option><option value="custom">Il mio video o la mia immagine</option></select>
+<div class="edrow"><button class="alt sm" id="bgbtn" type="button">📁 Scegli il mio video o la mia immagine di sfondo…</button><input id="bgfile" type="file" accept="video/*,image/*,.mkv,.avi,.wmv,.flv,.mpg,.mpeg" hidden><span id="bginfo" class="hint" style="margin:0"></span></div>
+<label for="ovl">Sopra il testo, nei video</label>
+<select id="ovl"><option value="none">Niente</option><option value="chords">Accordi (rilevati dalla base)</option><option value="notes">Note cantate</option><option value="both">Accordi e note</option></select>
+<label for="nota">Nome delle note e degli accordi</label>
+<select id="nota"><option value="it">Italiano (Do, Re, Mi…)</option><option value="en">Anglosassone (C, D, E…)</option></select>
+<label for="vres">Dimensione dei video MP4/AVI</label>
+<select id="vres"><option value="480">Veloce (854×480, molto più rapido)</option><option value="720">Alta (1280×720, più lento)</option></select>
+<button id="export" type="button">💾 Salva</button><button id="tolib" class="alt" type="button">⭐ Salva in libreria</button>
+<a id="dbase" class="lk" hidden>Scarica la base senza voce (WAV)</a>
+<p class="hint">Audio e video usano la base senza voce (con la voce originale al volume scelto sopra). Il video è 1280×720 con la scritta «Syncro By SirJoe» e può richiedere alcuni minuti. I formati KAR e CDG non si possono creare.</p>
+</section>
+</main>
+<div id="status" role="status"></div>
+<script>
+const $=s=>document.querySelector(s);
+const ed={open:false,k:-1,zoom:10,t0:0,panAt:0,drag:null,hist:[],fut:[],wf:null,tap:{on:false}};
+let data=null,mediaId='',resMedia='',subs='',stems=false,W=[],sel=-1,lastLine=-1,msgT=null,idleT=null,found={media:[],lyrics:[]};
+const au=$('#au'),av=$('#av'),kar=$('#kar'),stage=$('#stage'),seek=$('#seek'),tm=$('#tm');
+function setMsg(t,ms){const s=$('#status');s.textContent=t||'';clearTimeout(msgT);if(t&&ms!==0)msgT=setTimeout(()=>{s.textContent='';},ms||15000);}
+$('#status').onclick=()=>setMsg('');
+const mmss=t=>{t=Math.max(0,t||0);return Math.floor(t/60)+':'+String(Math.floor(t%60)).padStart(2,'0');};
+const el=(tag,cls,txt)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e;};
+const safe=s=>(s||'karaoke').replace(/[\\/:*?"<>|]+/g,'_').trim()||'karaoke';
+function download(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},3000);}
+async function post(path,fd){const r=await fetch(path,{method:'POST',body:fd});const raw=await r.text();let j=null;try{j=JSON.parse(raw);}catch(_){}
+  if(!r.ok||j===null)throw new Error((j&&j.detail)||'Errore del server: guarda la finestra nera per i dettagli.');return j;}
+async function getJSON(path){const r=await fetch(path);const raw=await r.text();let j=null;try{j=JSON.parse(raw);}catch(_){}
+  if(!r.ok||j===null)throw new Error((j&&j.detail)||'Errore del server: guarda la finestra nera per i dettagli.');return j;}
+async function postBlob(path,fd){const r=await fetch(path,{method:'POST',body:fd});
+  if(!r.ok){let m='Errore del server: guarda la finestra nera per i dettagli.';try{m=(await r.json()).detail||m;}catch(_){}throw new Error(m);}return r.blob();}
+async function runBusy(btn,fn){btn.disabled=true;try{await fn();}catch(e){setMsg(e.message,0);}finally{btn.disabled=false;}}
+
+/* ---------- testo da file ---------- */
+async function readText(f){const b=await f.arrayBuffer();try{return new TextDecoder('utf-8',{fatal:true}).decode(b);}catch(_){return new TextDecoder('windows-1252').decode(b);}}
+function cleanLyrics(name,txt){
+  const dedupe=/\.(srt|vtt)$/i.test(name),out=[];
+  for(const raw of txt.replace(/\r/g,'').replace(/^\uFEFF/,'').split('\n')){
+    let l=raw.trim();
+    if(!l||/^WEBVTT/.test(l)||/^(NOTE|Kind:|Language:)/.test(l)||l.includes('-->')||/^\d+$/.test(l))continue;
+    if(/^\[(ti|ar|al|au|by|offset|length|re|ve|tool):.*\]$/i.test(l))continue;
+    if(/^(\[Script Info\]|\[V4\+ Styles\]|\[Events\]|Style:|Format:|Title:|ScriptType:|PlayRes|WrapStyle|ScaledBorder)/.test(l))continue;
+    if(/^Dialogue:/.test(l))l=l.split(',').slice(9).join(',');
+    l=l.replace(/\{[^}]*\}/g,'').replace(/\\N/g,' ').replace(/\[\d+:\d+(?:[.:]\d+)?\]/g,'').replace(/<\d+:\d+(?:[.:]\d+)?>/g,'').replace(/<[^>]+>/g,'').replace(/♪/g,'').trim();
+    if(!l||/^\[.*\]$/.test(l))continue;
+    if(dedupe&&out.length&&out[out.length-1]===l)continue;
+    out.push(l);
+  }
+  return out.join('\n');
+}
+$('#ftbtn').onclick=()=>$('#ft').click();
+$('#ft').onchange=async e=>{const f=e.target.files[0];if(!f)return;
+  const txt=cleanLyrics(f.name,await readText(f));e.target.value='';
+  if(!txt){setMsg('Nel file non ho trovato testo utilizzabile.');return;}
+  $('#t').value=txt;setMsg('Testo caricato da '+f.name+'.');};
+
+/* ---------- brano, link e sottotitoli ---------- */
+$('#f').onchange=()=>{const f=$('#f').files[0];if(!f)return;mediaId='';subs='';$('#url').value='';
+  $('#info').textContent='File scelto: '+f.name;$('#dla').hidden=true;$('#usesubs').hidden=true;
+  if(!$('#ti').value)$('#ti').value=f.name.replace(/\.[^.]+$/,'');};
+async function fetchUrl(u){
+  const clipOn=$('#getclip')&&$('#getclip').checked;
+  $('#url').value=u;setMsg('Scarico audio e sottotitoli… un attimo.',0);
+  const fd=new FormData();fd.append('url',u);fd.append('language',$('#lang').value);fd.append('clip',clipOn);
+  const j=await post('/api/fetch',fd);
+  mediaId=j.id;subs=j.subs||'';$('#f').value='';
+  if(!$('#ti').value)$('#ti').value=j.title||'';if(!$('#ar').value)$('#ar').value=j.artist||'';
+  $('#info').textContent='Scaricato: '+(j.title||'audio')+(j.duration?' ('+mmss(j.duration)+')':'')+(subs?(j.subs_auto?' · sottotitoli automatici trovati':' · sottotitoli trovati'):' · nessun sottotitolo');
+  $('#usesubs').hidden=!subs;const a=$('#dla');a.href='/api/media/'+mediaId+'/audio';a.download=safe(j.title||'audio')+'.wav';a.hidden=false;
+  if(subs&&!$('#t').value.trim()){$('#t').value=subs;setMsg('Audio e testo aggiunti. Controlla il testo e premi Sincronizza.');}
+  else setMsg('Audio aggiunto alla sincronizzazione.');
+}
+$('#fetch').onclick=()=>{const u=$('#url').value.trim();if(!u){setMsg('Incolla prima un link.');return;}runBusy($('#fetch'),()=>fetchUrl(u));};
+$('#usesubs').onclick=()=>{$('#t').value=subs;setMsg('Testo sostituito con i sottotitoli del video.');};
+
+/* ---------- ricerca ---------- */
+function setLyrics(it){$('#t').value=it.plain;if(!$('#ti').value)$('#ti').value=it.title||'';if(!$('#ar').value)$('#ar').value=it.artist||'';setMsg('Testo aggiunto alla sincronizzazione.');}
+async function saveMedia(url,kind){
+  const it=found.media.find(x=>x.url===url);
+  setMsg('Scarico '+(kind==='mp3'?'l\'audio':'il video')+'… può richiedere un po\'.',0);
+  const fd=new FormData();fd.append('url',url);fd.append('kind',kind);
+  const b=await postBlob('/api/download',fd);download(b,safe(it?it.title:'video')+'.'+kind);setMsg('File salvato.');
+}
+function renderMedia(list){
+  const box=$('#rm');box.textContent='';box.appendChild(el('div','rh','Video e audio trovati'));
+  if(!list.length){box.appendChild(el('div','hint','Nessun risultato.'));return;}
+  list.forEach(it=>{
+    const row=el('div','item');
+    if(it.thumb){const im=el('img');im.src=it.thumb;im.alt='';im.loading='lazy';im.referrerPolicy='no-referrer';row.appendChild(im);}
+    const meta=el('div','meta');meta.appendChild(el('b',null,it.title));
+    meta.appendChild(el('span',null,[it.channel,it.duration?mmss(it.duration):''].filter(Boolean).join(' · ')));row.appendChild(meta);
+    const acts=el('div','acts');
+    const add=el('button','sm','➕ Aggiungi');add.type='button';add.onclick=()=>runBusy(add,()=>fetchUrl(it.url));
+    const s3=el('button','alt sm','Salva MP3');s3.type='button';s3.onclick=()=>runBusy(s3,()=>saveMedia(it.url,'mp3'));
+    const s4=el('button','alt sm','Salva MP4');s4.type='button';s4.onclick=()=>runBusy(s4,()=>saveMedia(it.url,'mp4'));
+    acts.append(add,s3,s4);row.appendChild(acts);box.appendChild(row);
+  });
+}
+function renderLyrics(list){
+  const box=$('#rl');box.textContent='';box.appendChild(el('div','rh','Testi trovati'));
+  if(!list.length){box.appendChild(el('div','hint','Nessun testo trovato.'));return;}
+  list.forEach(it=>{
+    const row=el('div','item'),meta=el('div','meta');
+    meta.appendChild(el('b',null,(it.title||'Senza titolo')+(it.artist?' — '+it.artist:'')));
+    meta.appendChild(el('span',null,it.plain.split('\n').filter(Boolean).slice(0,2).join(' / ')));row.appendChild(meta);
+    const acts=el('div','acts'),nm=safe(it.title||'testo');
+    const use=el('button','sm','➕ Usa questo testo');use.type='button';use.onclick=()=>setLyrics(it);
+    const tx=el('button','alt sm','Salva .txt');tx.type='button';tx.onclick=()=>download(new Blob([it.plain],{type:'text/plain'}),nm+'.txt');
+    acts.append(use,tx);
+    if(it.synced){const lr=el('button','alt sm','Salva .lrc');lr.type='button';lr.onclick=()=>download(new Blob([it.synced],{type:'text/plain'}),nm+'.lrc');acts.appendChild(lr);}
+    row.appendChild(acts);box.appendChild(row);
+  });
+}
+async function searchMedia(){const q=$('#q').value.trim();if(!q)throw new Error('Scrivi cosa cercare.');
+  setMsg('Cerco video e audio…',0);found.media=await getJSON('/api/search/media?q='+encodeURIComponent(q)+'&source='+$('#src').value);
+  renderMedia(found.media);setMsg(found.media.length+' risultati per video e audio.');return found.media;}
+async function searchLyrics(){const q=$('#q').value.trim();if(!q)throw new Error('Scrivi cosa cercare.');
+  setMsg('Cerco i testi…',0);found.lyrics=await getJSON('/api/search/lyrics?q='+encodeURIComponent(q));
+  renderLyrics(found.lyrics);setMsg(found.lyrics.length+' testi trovati.');return found.lyrics;}
+$('#sm').onclick=()=>runBusy($('#sm'),async()=>{await searchMedia();});
+$('#sl').onclick=()=>runBusy($('#sl'),async()=>{await searchLyrics();});
+$('#sa').onclick=()=>runBusy($('#sa'),async()=>{
+  let m=[],l=[],err='';
+  try{l=await searchLyrics();}catch(e){err=e.message;}
+  try{m=await searchMedia();}catch(e){err=e.message;}
+  if(err&&!l.length&&!m.length)throw new Error(err);
+});
+$('#q').addEventListener('keydown',e=>{if(e.key==='Enter')$('#sa').click();});
+const qv=()=>encodeURIComponent($('#q').value.trim());
+$('#gg').onclick=()=>window.open('https://www.google.com/search?q='+qv()+'+testo','_blank','noopener');
+$('#gn').onclick=()=>window.open('https://genius.com/search?q='+qv(),'_blank','noopener');
+$('#gy').onclick=()=>window.open('https://www.youtube.com/results?search_query='+qv(),'_blank','noopener');
+
+/* ---------- sincronizzazione ---------- */
+$('#go').onclick=()=>runBusy($('#go'),async()=>{
+  const f=$('#f').files[0];
+  if((!f&&!mediaId)||!$('#t').value.trim()){setMsg('Servono un brano (file o link) e il testo.');return;}
+  const fd=new FormData();if(mediaId)fd.append('media_id',mediaId);else fd.append('audio',f);
+  fd.append('lyrics',$('#t').value);fd.append('language',$('#lang').value);
+  fd.append('separate',$('#sep').checked);fd.append('quality',$('#qual').value);fd.append('model',$('#mdl').value);fd.append('title',$('#ti').value);fd.append('artist',$('#ar').value);
+  setMsg($('#sep').checked?'Isolo la voce e sincronizzo… possono servire diversi minuti, non chiudere la pagina.':'Sincronizzo… può richiedere qualche minuto.',0);
+  const t0=Date.now(),tk=setInterval(()=>{const sec=Math.round((Date.now()-t0)/1000);
+    setMsg((($('#sep').checked?'Isolo la voce e sincronizzo… ':'Sincronizzo… ')+Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0')+' trascorsi. Non chiudere la pagina.'),0);},1000);
+  try{data=await post('/api/align',fd);}finally{clearInterval(tk);}
+  mediaId=resMedia=data.media_id;show();
+  setMsg(data.stems?'Fatto! Base karaoke senza voce pronta: le parole restano a tempo.':'Fatto! Se vuoi la base senza voce, usa il pulsante qui sotto.');
+  $('#res').scrollIntoView({behavior:'smooth',block:'start'});
+});
+
+/* ---------- finestra karaoke ---------- */
+function loadMedia(){
+  const b='/api/media/'+resMedia+'/';stems=!!data.stems;
+  stage.classList.toggle('isvideo',!!data.video);if(data.video)stems=false;
+  au.src=b+(data.video?'video':(stems?'instrumental':'audio'));
+  if(stems){av.src=b+'vocals';av.volume=$('#vol').value/100;}else av.removeAttribute('src');
+  $('#mixrow').hidden=!stems;$('#rmv').hidden=stems;$('#dbase').hidden=!stems;
+  $('#dbase').href=b+'instrumental';$('#dbase').download=safe($('#ti').value||'base')+' - base senza voce.wav';
+}
+function show(){
+  $('#res').hidden=false;loadMedia();kar.textContent='';sel=-1;lastLine=-1;ed.k=-1;ed.hist=[];ed.fut=[];ed.t0=0;ed.wf=null;if(ed.tap.on)edTapStop();
+  data.lines.forEach((l,i)=>{const d=el('div','l');d.dataset.i=i;
+    l.words.forEach(w=>{d.appendChild(el('span','w',w.w));d.appendChild(document.createTextNode(' '));});kar.appendChild(d);});
+  if(!data.lines.length)kar.appendChild(el('div','note','Brano senza testo sincronizzato: si ascolta solo la musica. Per avere le parole, caricane il testo e premi Sincronizza.'));
+  layout();if(ed.open)edLoadWave();
+}
+function layout(){
+  W=[];kar.querySelectorAll('.l').forEach((d,i)=>{d.querySelectorAll('.w').forEach((s,j)=>{W.push({l:i,w:j,el:s,p:-1});});});
+  lastLine=-1;paintNow();
+}
+const T=k=>data.lines[W[k].l].words[W[k].w].start;
+function curLine(t){
+  const n=W.length;let lo=0,hi=n-1,i=-1;
+  while(lo<=hi){const m=(lo+hi)>>1;if(T(m)<=t){i=m;lo=m+1;}else hi=m-1;}
+  if(i<0)return W[0].l;if(i===n-1)return W[i].l;
+  const t1=T(i+1),hd=Math.min(0.45,Math.max(0.12,t1-T(i)));
+  return t>=t1-hd?W[i+1].l:W[i].l;
+}
+function pauseInfo(t){
+  let k=-1;for(let i=0;i<W.length;i++){if(T(i)>t){k=i;break;}}
+  if(k<0)return null;
+  let pe=0;if(k>0){const q=W[k-1],w=data.lines[q.l].words[q.w];pe=Math.min(w.end,w.start+6);}
+  if(T(k)-pe<=5||t<pe)return null;
+  return{k:W[k].l,rem:T(k)-t,el:t-pe};
+}
+function paintNow(){
+  if(!data)return;const t=au.currentTime,dur=au.duration||0;
+  if(document.activeElement!==seek)seek.value=dur?Math.round(t/dur*1000):0;
+  tm.textContent=mmss(t)+' / '+mmss(dur);
+  if(!W.length)return;
+  if(stems&&!au.paused&&Math.abs(av.currentTime-t)>0.2)av.currentTime=t;
+  for(let k=0;k<W.length;k++){const q=W[k],w=data.lines[q.l].words[q.w],d=Math.max(0.08,w.end-w.start);
+    let f=t<=w.start?0:(t>=w.end||t>=w.start+d)?1:(t-w.start)/d;f=Math.round(f*200)/2;
+    if(f!==q.p){q.p=f;q.el.style.setProperty('--p',f+'%');}}
+  const pi=pauseInfo(t),cd=$('#cd');
+  if(pi){const r=pi.rem,f=Math.min(1,r/5);cd.style.visibility='visible';
+    $('#cdbar').style.clipPath='inset(0 '+((1-f)*100).toFixed(1)+'% 0 0 round 9px)';
+    $('#cdnum').textContent=r<=5?Math.ceil(r):'♪';
+    $('#cdlab').textContent=r<=5?'Si riparte tra…':'♪ Pausa strumentale';}
+  else cd.style.visibility='hidden';
+  if(ed.open)edDraw();
+  const ln=pi&&pi.el>=0.8?pi.k:curLine(t);
+  if(ln!==lastLine){lastLine=ln;
+    kar.querySelectorAll('.l').forEach((d,i)=>d.classList.toggle('cur',i===ln));
+    const d=kar.children[ln];kar.scrollTo({top:d.offsetTop-kar.clientHeight/2+d.offsetHeight/2,behavior:'smooth'});}
+}
+function loop(){paintNow();if(!au.paused)requestAnimationFrame(loop);}
+
+/* ---------- lettore: play, stop, ricomincia, cursore, schermo intero ---------- */
+const inFs=()=>(document.fullscreenElement||document.webkitFullscreenElement)===stage;
+function uiShow(){stage.classList.remove('hide-ui');clearTimeout(idleT);
+  if(inFs()&&!au.paused)idleT=setTimeout(()=>stage.classList.add('hide-ui'),2500);}
+function togglePlay(){if(!data)return;au.paused?au.play():au.pause();}
+function toggleFs(){
+  if(!data)return;
+  if(inFs()){(document.exitFullscreen||document.webkitExitFullscreen).call(document);return;}
+  const rq=stage.requestFullscreen||stage.webkitRequestFullscreen;
+  if(!rq){setMsg('Lo schermo intero non è disponibile in questo browser.');return;}
+  Promise.resolve(rq.call(stage)).catch(()=>setMsg('Lo schermo intero non è disponibile.'));
+}
+['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{
+  lastLine=-1;stage.classList.remove('hide-ui');$('#fs').textContent=inFs()?'✕':'⛶';uiShow();paintNow();}));
+$('#pp').onclick=togglePlay;
+$('#st').onclick=()=>{au.pause();au.currentTime=0;paintNow();};
+$('#rs').onclick=()=>{au.currentTime=0;au.play();};
+$('#fs').onclick=toggleFs;
+seek.oninput=()=>{if(au.duration){au.currentTime=seek.value/1000*au.duration;paintNow();}};
+$('#mv').oninput=e=>{au.volume=e.target.value/100;};
+stage.addEventListener('mousemove',uiShow);stage.addEventListener('touchstart',uiShow,{passive:true});
+stage.addEventListener('dblclick',e=>{if(!e.target.closest('#pbar'))toggleFs();});
+au.addEventListener('play',()=>{$('#pp').textContent='⏸';if(stems)av.play().catch(()=>{});loop();
+  if(inFs())setTimeout(()=>{if(!au.paused&&inFs())stage.classList.add('hide-ui');},400);});
+au.addEventListener('pause',()=>{$('#pp').textContent='▶';av.pause();stage.classList.remove('hide-ui');clearTimeout(idleT);paintNow();});
+au.addEventListener('ended',()=>{$('#pp').textContent='▶';av.pause();stage.classList.remove('hide-ui');plNext(true);});
+au.addEventListener('seeked',()=>{if(stems)av.currentTime=au.currentTime;paintNow();});
+au.addEventListener('timeupdate',paintNow);au.addEventListener('loadedmetadata',paintNow);
+au.addEventListener('ratechange',()=>{av.playbackRate=au.playbackRate;});
+$('#vol').oninput=e=>{$('#volv').textContent=e.target.value+'%';av.volume=e.target.value/100;};
+document.addEventListener('keydown',e=>{
+  if(!data)return;const tg=e.target.tagName;if(['INPUT','TEXTAREA','SELECT','BUTTON'].includes(tg))return;
+  if(e.code==='Space'){e.preventDefault();togglePlay();}
+  else if(e.key==='f'||e.key==='F')toggleFs();
+});
+kar.addEventListener('click',e=>{const d=e.target.closest('.l');if(!d)return;sel=+d.dataset.i;
+  kar.querySelectorAll('.l').forEach((x,i)=>x.classList.toggle('sel',i===sel));
+  const sp=e.target.closest('.w'),k=sp?W.findIndex(q=>q.el===sp):-1;
+  if(k>=0){ed.k=k;kar.querySelectorAll('.w').forEach(x=>x.classList.remove('wsel'));sp.classList.add('wsel');edInfo();if(ed.open)edSelect(k,true);au.currentTime=Math.max(0,wd(k).start-0.5);}
+  else au.currentTime=Math.max(0,data.lines[sel].start-0.8);paintNow();});
+function nudge(d,mode){
+  if(mode!=='all'&&sel<0){setMsg('Tocca prima una riga del karaoke per selezionarla.');return;}
+  const r=x=>+Math.max(0,x+d).toFixed(2);
+  data.lines.forEach((l,i)=>{if(mode==='all'||(mode==='line'&&i===sel)||(mode==='from'&&i>=sel)){
+    l.start=r(l.start);l.end=r(l.end);l.words.forEach(w=>{w.start=r(w.start);w.end=r(w.end);});}});
+  setMsg('');paintNow();
+}
+[['n1',-0.1,'line'],['n2',0.1,'line'],['n3',-0.1,'from'],['n4',0.1,'from'],['n5',-0.1,'all'],['n6',0.1,'all']]
+  .forEach(([id,d,m])=>{$('#'+id).onclick=()=>nudge(d,m);});
+
+/* ---------- editor manuale della timeline ---------- */
+const wd=k=>data.lines[W[k].l].words[W[k].w];
+const edSnap=()=>data.lines.map(l=>l.words.map(w=>[w.start,w.end]));
+function edRestore(s){data.lines.forEach((l,i)=>l.words.forEach((w,j)=>{if(s[i]&&s[i][j]){w.start=s[i][j][0];w.end=s[i][j][1];}}));edFix();}
+function edPush(){ed.hist.push(edSnap());if(ed.hist.length>150)ed.hist.shift();ed.fut=[];}
+function edFix(){data.lines.forEach(l=>{if(!l.words.length)return;l.start=+l.words[0].start.toFixed(2);l.end=+Math.max(...l.words.map(w=>w.end)).toFixed(2);});edInfo();paintNow();edDraw();}
+function edUndo(){if(!ed.hist.length)return;ed.fut.push(edSnap());edRestore(ed.hist.pop());}
+function edRedo(){if(!ed.fut.length)return;ed.hist.push(edSnap());edRestore(ed.fut.pop());}
+const r2=x=>+x.toFixed(3);
+function edSelect(k,center){
+  if(!data||!W.length)return;k=Math.max(0,Math.min(W.length-1,k));ed.k=k;sel=W[k].l;
+  kar.querySelectorAll('.l').forEach((x,i)=>x.classList.toggle('sel',i===sel));
+  kar.querySelectorAll('.w').forEach(x=>x.classList.remove('wsel'));W[k].el.classList.add('wsel');
+  if(center){const w=wd(k);ed.t0=Math.max(0,w.start-ed.zoom*0.3);}
+  edInfo();edDraw();
+}
+function edInfo(){
+  const i=$('#edinfo');if(!data||!W.length||ed.k<0||ed.k>=W.length){i.textContent='Tocca una parola del testo o della timeline per selezionarla.';return;}
+  const w=wd(ed.k);i.textContent='Parola «'+w.w+'» · inizio '+w.start.toFixed(2)+' s · fine '+w.end.toFixed(2)+' s · durata '+(w.end-w.start).toFixed(2)+' s';
+}
+/* forma d'onda: voce isolata se c'è, altrimenti l'audio del brano */
+async function edLoadWave(){
+  if(!data||!resMedia)return;const url='/api/media/'+resMedia+'/'+(stems?'vocals':'audio'),key=url;
+  if(ed.wf&&ed.wf.key===key)return;ed.wf={key,peaks:null,loading:true};edDraw();
+  try{const buf=await (await fetch(url)).arrayBuffer();const AC=window.AudioContext||window.webkitAudioContext;const ctx=new AC();
+    const ab=await ctx.decodeAudioData(buf);ctx.close&&ctx.close();
+    const ch=ab.getChannelData(0),sr=ab.sampleRate,step=Math.max(1,Math.floor(sr/100)),n=Math.floor(ch.length/step),pk=new Float32Array(n);let mx=0;
+    for(let i=0;i<n;i++){let m=0;const a=i*step;for(let j=a;j<a+step;j+=2){const v=Math.abs(ch[j]);if(v>m)m=v;}pk[i]=m;if(m>mx)mx=m;}
+    if(mx>0)for(let i=0;i<n;i++)pk[i]/=mx;
+    if(ed.wf&&ed.wf.key===key)ed.wf={key,peaks:pk,loading:false};
+  }catch(e){ed.wf={key,peaks:null,loading:false,err:true};}
+  edDraw();
+}
+const TLH=236,RUL=22,WAV=84,LANE=40;
+function edSize(){const c=$('#tl'),dpr=window.devicePixelRatio||1,w=c.clientWidth||600;
+  if(c.width!==Math.round(w*dpr)||c.height!==Math.round(TLH*dpr)){c.width=Math.round(w*dpr);c.height=Math.round(TLH*dpr);c.style.height=TLH+'px';}
+  return{c,dpr,w};}
+const edX=(t,w)=>(t-ed.t0)/ed.zoom*w, edT=(x,w)=>ed.t0+x/w*ed.zoom;
+function edBlocks(w){ /* parole visibili con rettangoli */
+  const out=[];if(!data)return out;const t1=ed.t0+ed.zoom;
+  for(let k=0;k<W.length;k++){const q=wd(k);if(q.end<ed.t0-0.5||q.start>t1+0.5)continue;
+    const x1=edX(q.start,w),x2=Math.max(edX(q.end,w),x1+5);out.push({k,x1,x2,y:RUL+WAV+6+(W[k].l%3)*LANE,h:LANE-6});}
+  return out;
+}
+function edDraw(){
+  if(!ed.open||!data)return;const{c,dpr,w}=edSize(),g=c.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);
+  const dur=au.duration||Math.max(60,...data.lines.map(l=>l.end),0),t=au.currentTime||0;
+  if(!au.paused&&!ed.drag&&!ed.tap.on&&Date.now()-ed.panAt>4000&&(t<ed.t0+0.04*ed.zoom||t>ed.t0+0.85*ed.zoom))ed.t0=Math.max(0,t-0.15*ed.zoom);
+  ed.t0=Math.max(0,Math.min(Math.max(0,dur-ed.zoom),ed.t0));
+  const sc=$('#edsc');if(document.activeElement!==sc)sc.value=dur>ed.zoom?Math.round(ed.t0/(dur-ed.zoom)*1000):0;
+  g.fillStyle='#0A1B3D';g.fillRect(0,0,w,TLH);
+  /* righello */
+  g.fillStyle='#8EA3C9';g.font='11px sans-serif';g.textBaseline='top';g.strokeStyle='#26407A';g.lineWidth=1;
+  const st=ed.zoom<=5?0.5:ed.zoom<=10?1:ed.zoom<=20?2:5;
+  for(let s=Math.ceil(ed.t0/st)*st;s<ed.t0+ed.zoom;s+=st){const x=Math.round(edX(s,w))+.5;g.beginPath();g.moveTo(x,RUL-6);g.lineTo(x,TLH);g.globalAlpha=.35;g.stroke();g.globalAlpha=1;g.fillText(mmss(s),x+3,4);}
+  /* forma d'onda */
+  const mid=RUL+WAV/2;
+  if(ed.wf&&ed.wf.peaks){g.fillStyle='#4C79C9';const pk=ed.wf.peaks;
+    for(let x=0;x<w;x+=1){const a=Math.floor(edT(x,w)*100),b=Math.max(a+1,Math.floor(edT(x+1,w)*100));let m=0;for(let i=a;i<b&&i<pk.length;i++){if(i>=0&&pk[i]>m)m=pk[i];}
+      const h=m*(WAV/2-3);if(h>0)g.fillRect(x,mid-h,1,h*2);}}
+  else{g.fillStyle='#8EA3C9';g.font='12px sans-serif';g.fillText(ed.wf&&ed.wf.loading?'Carico la forma d\'onda…':(ed.wf&&ed.wf.err?'Forma d\'onda non disponibile: si possono usare comunque le parole.':''),10,mid-6);}
+  /* parole */
+  const lsel=ed.k>=0&&ed.k<W.length?W[ed.k].l:-1;g.font='bold 13px sans-serif';g.textBaseline='middle';
+  edBlocks(w).forEach(b=>{const isel=b.k===ed.k,inl=W[b.k].l===lsel;
+    g.fillStyle=isel?'#E9B949':(W[b.k].l%2?'#C93C3C':'#E5484D');g.globalAlpha=isel?1:(inl?.95:.8);
+    g.beginPath();g.roundRect?g.roundRect(b.x1,b.y,b.x2-b.x1,b.h,6):g.rect(b.x1,b.y,b.x2-b.x1,b.h);g.fill();g.globalAlpha=1;
+    if(isel){g.strokeStyle='#fff';g.lineWidth=2;g.stroke();}
+    g.save();g.beginPath();g.rect(b.x1+2,b.y,Math.max(0,b.x2-b.x1-4),b.h);g.clip();g.fillStyle=isel?'#2A1B00':'#fff';g.fillText(wd(b.k).w,b.x1+6,b.y+b.h/2);g.restore();
+    g.fillStyle='rgba(255,255,255,.55)';g.fillRect(b.x1,b.y+6,2,b.h-12);g.fillRect(b.x2-2,b.y+6,2,b.h-12);});
+  /* cursore di riproduzione */
+  const px=edX(t,w);if(px>=0&&px<=w){g.strokeStyle='#FFD36B';g.lineWidth=2;g.beginPath();g.moveTo(px,0);g.lineTo(px,TLH);g.stroke();}
+}
+function edHit(x,y,w){
+  const bl=edBlocks(w);for(let i=bl.length-1;i>=0;i--){const b=bl[i];if(y>=b.y&&y<=b.y+b.h&&x>=b.x1-3&&x<=b.x2+3){
+    const e=Math.min(9,(b.x2-b.x1)/3);return{k:b.k,zone:x<=b.x1+e?'L':x>=b.x2-e?'R':'M'};}}
+  return null;
+}
+function edPos(e){const r=$('#tl').getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top,w:r.width};}
+$('#tl').addEventListener('pointerdown',e=>{
+  if(!data||!W.length)return;const p=edPos(e),h=edHit(p.x,p.y,p.w);$('#tl').focus();
+  if(!h){au.currentTime=Math.max(0,Math.min(au.duration||1e9,edT(p.x,p.w)));paintNow();edDraw();return;}
+  edSelect(h.k,false);const k=h.k,q=wd(k);
+  ed.drag={k,zone:h.zone,x0:p.x,w:p.w,moved:false,o:W.map((_,j)=>[wd(j).start,wd(j).end]),snap:edSnap()};
+  $('#tl').setPointerCapture(e.pointerId);e.preventDefault();
+});
+$('#tl').addEventListener('pointermove',e=>{
+  const p=edPos(e);
+  if(!ed.drag){const h=data&&W.length?edHit(p.x,p.y,p.w):null;$('#tl').style.cursor=h?(h.zone==='M'?'grab':'ew-resize'):'crosshair';return;}
+  const d=ed.drag,dt=(p.x-d.x0)/d.w*ed.zoom,k=d.k,q=wd(k),prev=k>0?wd(k-1):null,next=k<W.length-1?wd(k+1):null,o=d.o[k];
+  if(!d.moved&&Math.abs(p.x-d.x0)<3)return;if(!d.moved){d.moved=true;ed.hist.push(d.snap);ed.fut=[];if(ed.hist.length>150)ed.hist.shift();}
+  W.forEach((_,j)=>{const w2=wd(j);w2.start=d.o[j][0];w2.end=d.o[j][1];}); /* si riparte sempre dai tempi originali: il trascinamento è reversibile */
+  const lo=prev?d.o[k-1][0]+0.03:0;
+  if(d.zone==='M'){
+    const follow=$('#edfol').checked,ns=Math.max(k*0.03,o[0]+dt),dd=ns-o[0];
+    if(follow){for(let j=k;j<W.length;j++){const w2=wd(j);w2.start=r2(d.o[j][0]+dd);w2.end=r2(d.o[j][1]+dd);}if(prev)prev.end=r2(Math.min(d.o[k-1][1],Math.max(d.o[k-1][0]+0.05,q.start)));}
+    else{q.start=r2(ns);q.end=r2(o[1]+dd);edResolve(k);}
+  }else if(d.zone==='L'){
+    const ns=Math.max(lo,Math.min(o[1]-0.05,o[0]+dt));q.start=r2(ns);if(prev)prev.end=r2(Math.min(d.o[k-1][1],Math.max(d.o[k-1][0]+0.05,ns)));
+  }else{
+    let ne=Math.max(o[0]+0.05,o[1]+dt);if(next)ne=Math.min(ne,d.o[k+1][0]);q.end=r2(ne);
+  }
+  edFix();
+});
+['pointerup','pointercancel'].forEach(n=>$('#tl').addEventListener(n,()=>{ed.drag=null;edInfo();}));
+$('#tl').addEventListener('wheel',e=>{e.preventDefault();ed.t0+=(e.deltaY+e.deltaX)*ed.zoom/700;ed.panAt=Date.now();edDraw();},{passive:false});
+$('#tl').addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&(e.key==='z'||e.key==='Z')){e.preventDefault();edUndo();return;}
+  if((e.ctrlKey||e.metaKey)&&(e.key==='y'||e.key==='Y')){e.preventDefault();edRedo();return;}
+  if(ed.k<0||!data)return;
+  if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();const dd=(e.key==='ArrowLeft'?-1:1)*(e.shiftKey?0.1:0.02);
+    if(e.altKey)edEnd(dd);else edMove(dd);}
+});
+function edResolve(k){ /* le parole che si scontrano vengono spinte avanti/indietro (mantenendo la loro durata), poi si accorciano le fini che si sovrappongono */
+  for(let j=k+1;j<W.length;j++){const a=wd(j),b=wd(j-1),need=Math.max(b.end,b.start+0.03);if(a.start<need-0.001){const dd=need-a.start;a.start=r2(a.start+dd);a.end=r2(a.end+dd);}else break;}
+  for(let j=k-1;j>=0;j--){const a=wd(j),b=wd(j+1);if(a.end>b.start+0.001){const dd=Math.min(a.end-b.start,a.start);a.start=r2(a.start-dd);a.end=r2(Math.max(a.start+0.05,a.end-(a.end-b.start)));}else break;}
+  for(let j=0;j<W.length-1;j++){const a=wd(j),b=wd(j+1);if(a.end>b.start)a.end=r2(Math.max(a.start+0.05,b.start));}
+}
+function edMove(dd){ /* sposta la parola selezionata (e le seguenti se richiesto) */
+  if(ed.k<0)return;edPush();const k=ed.k,fol=$('#edfol').checked,q=wd(k),d=Math.max(k*0.03,q.start+dd)-q.start;
+  for(let j=k;j<(fol?W.length:k+1);j++){const w2=wd(j);w2.start=r2(w2.start+d);w2.end=r2(w2.end+d);}
+  if(!fol)edResolve(k);else if(k>0&&wd(k-1).end>q.start)wd(k-1).end=r2(Math.max(wd(k-1).start+0.05,q.start));
+  edFix();
+}
+function edEnd(dd){if(ed.k<0)return;edPush();const q=wd(ed.k),n=ed.k<W.length-1?wd(ed.k+1):null;let ne=Math.max(q.start+0.05,q.end+dd);if(n)ne=Math.min(ne,n.start);q.end=r2(ne);edFix();}
+$('#edz').onchange=e=>{ed.zoom=+e.target.value;if(ed.k>=0)edSelect(ed.k,true);else edDraw();};
+$('#edsc').oninput=e=>{const dur=au.duration||0;ed.t0=dur>ed.zoom?e.target.value/1000*(dur-ed.zoom):0;ed.panAt=Date.now();edDraw();};
+$('#edun').onclick=edUndo;$('#edre').onclick=edRedo;
+$('#edpw').onclick=()=>edSelect((ed.k<0?0:ed.k-1),true);$('#ednw').onclick=()=>edSelect((ed.k<0?0:ed.k+1),true);
+$('#edm').onclick=()=>edMove(-0.05);$('#edp').onclick=()=>edMove(0.05);
+$('#edss').onclick=()=>{if(ed.k<0)return setMsg('Seleziona prima una parola.');
+  edPush();const q=wd(ed.k),prev=ed.k>0?wd(ed.k-1):null,t=Math.max(prev?prev.start+0.03:0,au.currentTime),dur=q.end-q.start;
+  const fol=$('#edfol').checked,d=t-q.start;if(fol){for(let j=ed.k;j<W.length;j++){const w2=wd(j);w2.start=r2(w2.start+d);w2.end=r2(w2.end+d);}}
+  else{q.start=r2(t);q.end=r2(Math.max(q.end+d*0,t+Math.min(dur,0.5)));edResolve(ed.k);}
+  if(prev&&prev.end>q.start)prev.end=r2(Math.max(prev.start+0.05,q.start));edFix();};
+$('#edse').onclick=()=>{if(ed.k<0)return setMsg('Seleziona prima una parola.');
+  edPush();const q=wd(ed.k),n=ed.k<W.length-1?wd(ed.k+1):null;let e=Math.max(q.start+0.05,au.currentTime);if(n)e=Math.min(e,n.start);q.end=r2(e);edFix();};
+$('#edsl').onclick=()=>{if(ed.k<0)return setMsg('Seleziona prima una parola della riga.');
+  edPush();const L=W[ed.k].l,d=au.currentTime-data.lines[L].words[0].start,fol=$('#edfol').checked,first=W.findIndex(q=>q.l===L);
+  const prev=first>0?wd(first-1):null;let dd=d;if(prev)dd=Math.max(dd,prev.start+0.03-data.lines[L].words[0].start);
+  data.lines.forEach((l,i)=>{if(i===L||(fol&&i>L))l.words.forEach(w=>{w.start=r2(w.start+dd);w.end=r2(w.end+dd);});});
+  if(prev&&prev.end>data.lines[L].words[0].start)prev.end=r2(Math.max(prev.start+0.05,data.lines[L].words[0].start));edFix();};
+/* marcatura a tempo: si preme TAP quando inizia ogni parola */
+function edTapStart(){
+  if(!data||!W.length)return;ed.tap.on=true;
+  if(ed.k<0){const t=au.currentTime;let k=W.findIndex((_,j)=>wd(j).start>=t-0.2);ed.k=k<0?0:k;}
+  edSelect(ed.k,false);edPush();$('#edtap').textContent='⏹ Fine marcatura';$('#edtapb').hidden=false;document.activeElement&&document.activeElement.blur&&document.activeElement.blur();
+  setMsg('Premi la barra spaziatrice quando inizia la parola «'+wd(ed.k).w+'». Il brano parte ora.',0);
+  if(au.paused)au.play().catch(()=>{});
+}
+function edTapStop(msg){ed.tap.on=false;$('#edtap').textContent='🎯 Marca a tempo';$('#edtapb').hidden=true;if(msg)setMsg(msg);else setMsg('');}
+function edTap(){
+  if(!ed.tap.on||!data)return;const k=ed.k,q=wd(k),t=Math.max(0,au.currentTime-0.08),prev=k>0?wd(k-1):null;
+  q.start=r2(Math.max(t,prev?prev.start+0.03:0));q.end=r2(Math.max(q.start+0.05,q.start+0.5));
+  if(prev&&prev.end>q.start-0.01||(prev&&q.start-prev.start<1.5))prev.end=r2(Math.max(prev.start+0.05,q.start-0.03));
+  for(let j=k+1;j<W.length;j++){const a=wd(j),b=wd(j-1);if(a.start<b.start+0.03){const dd=b.start+0.03-a.start;a.start=r2(a.start+dd);a.end=r2(Math.max(a.end+dd,a.start+0.05));}else break;}
+  edFix();
+  if(k>=W.length-1){edTapStop('Marcatura completata. Riascolta e, se serve, ritocca con la timeline.');return;}
+  edSelect(k+1,false);setMsg('Prossima parola: «'+wd(k+1).w+'»',0);
+}
+$('#edtap').onclick=()=>ed.tap.on?edTapStop('Marcatura terminata.'):edTapStart();
+$('#edtapb').onclick=edTap;
+$('#edsave').onclick=()=>$('#tolib').click();
+$('#ed').addEventListener('toggle',()=>{ed.open=$('#ed').open;if(ed.open){edLoadWave();if(ed.k>=0)edSelect(ed.k,true);else edDraw();}else if(ed.tap.on)edTapStop();});
+window.addEventListener('resize',edDraw);
+document.addEventListener('keydown',e=>{
+  if(ed.tap.on&&e.code==='Space'&&!['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)){e.preventDefault();e.stopImmediatePropagation();edTap();return;}
+  if(ed.tap.on&&e.key==='Escape')edTapStop('Marcatura terminata.');
+},true);
+$('#rmv').onclick=()=>runBusy($('#rmv'),async()=>{
+  setMsg('Rimuovo la voce originale… possono servire diversi minuti.',0);
+  const fd=new FormData();fd.append('media_id',resMedia);fd.append('quality',$('#qual').value);await post('/api/separate',fd);
+  const t=au.currentTime;data.stems=true;loadMedia();au.addEventListener('loadedmetadata',()=>{au.currentTime=t;},{once:true});
+  setMsg('Fatto! Ora la base è senza voce e le parole restano a tempo. Col cursore puoi riascoltare la voce originale.');
+});
+
+/* ---------- salva (audio, video, formati karaoke) ---------- */
+$('#export').onclick=()=>runBusy($('#export'),async()=>{
+  if(!data||!resMedia){setMsg('Prima sincronizza un brano.');return;}
+  const fmt=$('#exfmt').value,fd=new FormData();
+  fd.append('media_id',resMedia);fd.append('fmt',fmt);fd.append('lines',JSON.stringify(data.lines));
+  fd.append('title',$('#ti').value.trim());fd.append('artist',$('#ar').value.trim());fd.append('vocal',stems?$('#vol').value:0);fd.append('bg',$('#bgsel').value);fd.append('res',$('#vres').value);fd.append('overlay',$('#ovl').value);fd.append('notation',$('#nota').value);
+  const media=/^(mp3|wav|flac|mp4|avi)$/.test(fmt);if(/^(mp3|wav|flac)$/.test(fmt)&&stems&&$('#qual').value!=='standard')fd.append('quality',$('#qual').value);
+  setMsg(/^(mp4|avi)$/.test(fmt)?'Creo il video… può richiedere alcuni minuti, non chiudere la pagina.':(/^(mp3|wav|flac)$/.test(fmt)&&stems&&$('#qual').value!=='standard'?'Preparo la base senza voce in qualità '+$('#qual').selectedOptions[0].text.split(' ')[0].toLowerCase()+' (la prima volta richiede tempo)…':'Preparo il file…'),0);
+  const t0=Date.now(),base=$('#msg')?$('#msg').textContent:'',tk=setInterval(()=>{const sec=Math.round((Date.now()-t0)/1000);
+    setMsg((/^(mp4|avi)$/.test(fmt)?'Creo il video… ':'Preparo il file… ')+Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0')+' trascorsi. Non chiudere la pagina.',0);},1000);
+  let b;try{b=await postBlob('/api/export',fd);}finally{clearInterval(tk);}
+  const ext=fmt==='lrc-line'?'lrc':fmt;
+  download(b,safe($('#ti').value.trim()||'karaoke')+'.'+ext);setMsg('File salvato: '+ext.toUpperCase()+'.');
+});
+
+
+/* ---------- sfondo personale ---------- */
+function bgInfo(has,name){$('#bginfo').textContent=has?('Sfondo personale: '+(name||'caricato')):'';if(has)$('#bgsel').value='custom';else if($('#bgsel').value==='custom')$('#bgsel').value='auto';}
+$('#bgbtn').onclick=()=>{if(!data||!resMedia){setMsg('Prima apri o sincronizza un brano.');return;}$('#bgfile').click();};
+$('#bgfile').onchange=()=>runBusy($('#bgbtn'),async()=>{
+  const f=$('#bgfile').files[0];if(!f)return;setMsg('Carico lo sfondo…',0);
+  const fd=new FormData();fd.append('media_id',resMedia);fd.append('file',f);const r=await post('/api/background',fd);
+  bgInfo(true,r.name);setMsg('Sfondo personale pronto: sarà usato nei video MP4/AVI che salvi.');$('#bgfile').value='';
+});
+/* ---------- libreria, playlist, importazione ---------- */
+let lib=[],pls={playlists:{'Playlist 1':[]},current:'Playlist 1'};const pl={active:false,i:0,ids:[]};
+const byId=id=>lib.find(t=>t.id===id);
+async function loadLib(){try{lib=await getJSON('/api/library');pls=await getJSON('/api/playlists');}catch(e){setMsg('Libreria: '+e.message,0);}renderLib();}
+async function savePls(){const fd=new FormData();fd.append('data',JSON.stringify(pls));try{pls=await post('/api/playlists',fd);}catch(e){setMsg('Playlist: '+e.message,0);}renderLib();}
+function curIds(){return pls.playlists[pls.current]||[];}
+function renderLib(){
+  const sel=$('#plsel');sel.textContent='';
+  Object.keys(pls.playlists).forEach(n=>{const o=el('option',null,n+' ('+pls.playlists[n].length+')');o.value=n;if(n===pls.current)o.selected=true;sel.appendChild(o);});
+  const box=$('#plitems');box.textContent='';const ids=curIds().filter(byId);
+  if(!ids.length)box.appendChild(el('div','hint','Playlist vuota: aggiungi brani dall\'elenco qui sotto con «＋ Playlist».'));
+  ids.forEach((id,i)=>{const t=byId(id),row=el('div','item'+(pl.active&&pl.ids[pl.i]===id?' playing':''));
+    row.appendChild(el('div','num',String(i+1)));const meta=el('div','meta');meta.appendChild(el('b',null,t.title));meta.appendChild(el('span',null,[t.artist,t.nlines?t.nlines+' righe':'senza testo'].filter(Boolean).join(' · ')));row.appendChild(meta);
+    const acts=el('div','acts');
+    const mk=(txt,cls,fn)=>{const b=el('button',cls+' sm',txt);b.type='button';b.onclick=fn;acts.appendChild(b);};
+    mk('▶','',()=>playList(i,false));
+    mk('↑','alt',()=>{if(i>0){const a=curIds();[a[i-1],a[i]]=[a[i],a[i-1]];savePls();}});
+    mk('↓','alt',()=>{const a=curIds();if(i<a.length-1){[a[i+1],a[i]]=[a[i],a[i+1]];savePls();}});
+    mk('✕','alt',()=>{pls.playlists[pls.current]=curIds().filter((x,k)=>k!==i);savePls();});
+    row.appendChild(acts);box.appendChild(row);});
+  const lb=$('#libitems');lb.textContent='';
+  if(!lib.length)lb.appendChild(el('div','hint','La libreria è vuota. Importa file o sincronizza un brano e premi «Salva in libreria».'));
+  lib.forEach(t=>{const row=el('div','item'),meta=el('div','meta');meta.appendChild(el('b',null,t.title));
+    meta.appendChild(el('span',null,[t.artist,t.nlines?t.nlines+' righe':(t.video?'':(t.cdg?'grafica CDG':'senza testo')),t.video?'video karaoke':'',t.stems?'base senza voce':'',t.clip?'videoclip':''].filter(Boolean).join(' · ')));row.appendChild(meta);
+    const acts=el('div','acts');
+    const mk=(txt,cls,fn)=>{const b=el('button',cls+' sm',txt);b.type='button';b.onclick=fn;acts.appendChild(b);};
+    mk('🎤 Canta','',()=>runBusy(acts.firstChild,()=>playTrack(t.id,true)));
+    mk('＋ Playlist','alt',()=>{const a=curIds();if(!a.includes(t.id)){a.push(t.id);pls.playlists[pls.current]=a;savePls();setMsg('Aggiunto a «'+pls.current+'».');}else setMsg('È già nella playlist.');});
+    mk('🗑','alt',async()=>{if(!confirm('Eliminare «'+t.title+'» dalla libreria?'))return;const fd=new FormData();fd.append('media_id',t.id);await post('/api/library/delete',fd);
+      if(resMedia===t.id)clearResult();await loadLib();});
+    row.appendChild(acts);lb.appendChild(row);});
+  $('#pv').disabled=$('#nx').disabled=!pl.active;
+}
+async function playTrack(id,play){
+  const t=await getJSON('/api/library/'+id);
+  if(!au.paused)au.pause();
+  data={title:t.title,artist:t.artist,lines:t.lines,stems:t.stems,video:t.video,media_id:id};bgInfo(t.bg);mediaId=resMedia=id;
+  $('#ti').value=t.title||'';$('#ar').value=t.artist||'';
+  show();au.addEventListener('loadedmetadata',paintNow,{once:true});
+  if(play){try{await au.play();}catch(_){setMsg('Premi ▶ per far partire il brano.');}}
+  if(!inFs())$('#res').scrollIntoView({behavior:'smooth',block:'start'});
+}
+async function playList(i,fs){
+  pl.ids=curIds().filter(byId);if(!pl.ids.length){setMsg('La playlist è vuota.');return;}
+  pl.active=true;pl.i=Math.min(Math.max(0,i),pl.ids.length-1);renderLib();
+  try{await playTrack(pl.ids[pl.i],true);if(fs&&!inFs())toggleFs();}catch(e){setMsg(e.message);}
+}
+async function plNext(auto){
+  if(!pl.active)return;
+  if(auto&&pl.i>=pl.ids.length-1){pl.active=false;renderLib();setMsg('Playlist terminata.');return;}
+  const n=Math.min(pl.ids.length-1,pl.i+1);if(n===pl.i)return;pl.i=n;renderLib();
+  try{await playTrack(pl.ids[pl.i],true);}catch(e){setMsg(e.message);}
+}
+async function plPrev(){
+  if(!pl.active)return;if(au.currentTime>3){au.currentTime=0;return;}
+  pl.i=Math.max(0,pl.i-1);renderLib();try{await playTrack(pl.ids[pl.i],true);}catch(e){setMsg(e.message);}
+}
+$('#pv').onclick=plPrev;$('#nx').onclick=()=>plNext(false);
+$('#plplay').onclick=()=>playList(0,false);$('#plfs').onclick=()=>playList(0,true);
+$('#plsel').onchange=e=>{pls.current=e.target.value;savePls();};
+$('#plnew').onclick=()=>{const n=(prompt('Nome della nuova playlist:')||'').trim();if(!n)return;if(pls.playlists[n]){setMsg('Esiste già una playlist con questo nome.');return;}pls.playlists[n]=[];pls.current=n;savePls();};
+$('#plren').onclick=()=>{const o=pls.current,n=(prompt('Nuovo nome:',o)||'').trim();if(!n||n===o)return;if(pls.playlists[n]){setMsg('Esiste già una playlist con questo nome.');return;}
+  const out={};Object.keys(pls.playlists).forEach(k=>{out[k===o?n:k]=pls.playlists[k];});pls.playlists=out;pls.current=n;savePls();};
+$('#pldel').onclick=()=>{if(Object.keys(pls.playlists).length<2){pls.playlists[pls.current]=[];savePls();return;}
+  if(!confirm('Eliminare la playlist «'+pls.current+'»? I brani restano in libreria.'))return;delete pls.playlists[pls.current];pls.current=Object.keys(pls.playlists)[0];savePls();};
+$('#tolib').onclick=()=>runBusy($('#tolib'),async()=>{
+  if(!data||!resMedia){setMsg('Prima sincronizza o apri un brano.');return;}
+  const fd=new FormData();fd.append('media_id',resMedia);fd.append('title',$('#ti').value.trim());fd.append('artist',$('#ar').value.trim());fd.append('lines',JSON.stringify(data.lines));
+  setMsg('Salvo nella libreria…',0);const t=await post('/api/library/add',fd);mediaId=resMedia=t.id;data.stems=t.stems;await loadLib();setMsg('Salvato in libreria: «'+t.title+'». Ora puoi metterlo in una playlist.');
+});
+/*selftest*/
+$('#selft').onclick=()=>runBusy($('#selft'),async()=>{
+  setMsg('Controllo in corso…',0);const r=await getJSON('/api/selftest');const box=$('#selfres');box.textContent='';
+  box.appendChild(el('div',null,'Versione '+r.version+' · cartella del programma: '+r.folder));
+  r.steps.forEach(x=>box.appendChild(el('div',null,(x.ok?'✔ ':'✖ ')+x.step+(x.info&&!x.ok?' → '+x.info:''))));
+  setMsg(r.ok?'Tutto a posto: libreria e playlist funzionano.':'Problema trovato: leggi l\'elenco sotto «Libreria e playlist».',0);await loadLib();
+});
+$('#impbtn').onclick=()=>$('#impf').click();
+$('#impf').onchange=()=>runBusy($('#impbtn'),async()=>{
+  const fs=[...$('#impf').files];if(!fs.length)return;const fd=new FormData();fs.forEach(f=>fd.append('files',f));
+  setMsg('Importo '+fs.length+' file… i video grandi richiedono un po\'.',0);
+  const r=await post('/api/import',fd);$('#impf').value='';
+  const bits=[];if(r.tracks.length)bits.push(r.tracks.length+' brani aggiunti alla libreria');
+  if(r.lyrics.length){const L=r.lyrics[0];data=null;bits.push('testo con tempi «'+L.name+'» senza audio: aggiungi l\'audio con lo stesso nome');}
+  if(r.texts.length){$('#t').value=r.texts[0].text;bits.push('testo caricato nella casella');}
+  if(r.warnings.length)bits.push('attenzione: '+r.warnings.join(' · '));
+  $('#impres').textContent=bits.join(' — ')||'Nessun file riconosciuto.';setMsg(r.tracks.length?'Importazione completata.':'Importazione terminata.');await loadLib();
+});
+
+/* ---------- stato e uso offline ---------- */
+async function loadStatus(){
+  try{const s=await getJSON('/api/status'),box=$('#stpills');box.textContent='';
+    const pill=(t,ok)=>box.appendChild(el('span','pill '+(ok?'ok':'no'),(ok?'✔ ':'✖ ')+t));
+    pill('internet',s.online);pill('ffmpeg',s.ffmpeg);pill('Demucs (voce)',s.demucs);pill('Deno (YouTube)',s.deno);
+    pill('modello standard',s.whisper.small);pill('modello alto',s.whisper.medium);pill('modello veloce',s.whisper.base);pill('modelli Demucs',s.demucs_models>0);
+    $('#offbanner').hidden=s.online;
+    const p=s.prepare;$('#preplog').textContent=p.running?p.log.slice(-1)[0]||'Preparazione in corso…':(p.error||(p.done?'Preparazione completata: ora puoi usare l\'app offline.':''));
+    $('#prep').disabled=p.running;return p;}catch(_){return null;}
+}
+$('#prep').onclick=()=>runBusy($('#prep'),async()=>{
+  const fd=new FormData();fd.append('models',$('#prepmed').checked?'small,medium':'small');fd.append('demucs',$('#prepmed').checked?'high,max':'high');
+  await post('/api/prepare',fd);setMsg('Preparazione avviata: serve internet e qualche minuto.');
+  const t=setInterval(async()=>{const p=await loadStatus();if(p&&!p.running){clearInterval(t);}},3000);
+});
+window.addEventListener('online',loadStatus);window.addEventListener('offline',loadStatus);
+async function diag(){
+  const b=$('#diagbanner');
+  try{const d=await getJSON('/api/diag');
+    if(!d.writable){b.textContent='La cartella della libreria non è scrivibile ('+d.library+'): i brani non si possono salvare. Sposta il programma in una cartella normale (es. C:\\SirJoe) e riavvia.';b.hidden=false;}
+    else if(!d.ffmpeg){b.textContent='ffmpeg non trovato: la libreria e i salvataggi non funzioneranno. Installa ffmpeg (winget install ffmpeg) e riavvia.';b.hidden=false;}
+    else {b.hidden=true;$('#libpath').textContent='Libreria: '+d.library+' · '+d.tracks+' brani · versione '+d.version+' · programma in: '+d.folder;}
+  }catch(e){b.textContent='Il programma in esecuzione è una versione vecchia (mancano file nella cartella «app»). Chiudi la finestra nera, sostituisci TUTTA la cartella con quella dell\'ultimo zip e rilancia avvia.bat.';b.hidden=false;}
+}
+loadLib();loadStatus();diag();
+
+/* ---------- cancella ---------- */
+function delServer(id){if(!id)return;const fd=new FormData();fd.append('media_id',id);fetch('/api/delete',{method:'POST',body:fd}).catch(()=>{});}
+function clearResult(){
+  if(inFs())(document.exitFullscreen||document.webkitExitFullscreen).call(document);
+  au.pause();av.pause();au.removeAttribute('src');av.removeAttribute('src');
+  data=null;W=[];lastLine=-1;sel=-1;kar.textContent='';$('#res').hidden=true;resMedia='';
+}
+function clearAudio(){
+  clearResult();delServer(mediaId);mediaId='';subs='';
+  $('#f').value='';$('#url').value='';$('#info').textContent='';$('#dla').hidden=true;$('#usesubs').hidden=true;
+}
+const clearText=()=>{$('#t').value='';$('#ft').value='';};
+const clearMeta=()=>{$('#ti').value='';$('#ar').value='';};
+const clearSearch=()=>{$('#rm').textContent='';$('#rl').textContent='';$('#q').value='';found={media:[],lyrics:[]};};
+const clearLib=async()=>{if(!confirm('Cancellare TUTTA la libreria e le playlist? I brani importati o salvati andranno persi.'))return;
+  clearResult();pl.active=false;for(const t of lib){const fd=new FormData();fd.append('media_id',t.id);await fetch('/api/library/delete',{method:'POST',body:fd}).catch(()=>{});}await loadLib();};
+const CLEAR={audio:clearAudio,text:clearText,meta:clearMeta,search:clearSearch,result:clearResult};
+$('#clsel').onclick=async()=>{const on=[...document.querySelectorAll('.cl:checked')].map(c=>c.value);
+  if(!on.length){setMsg('Seleziona cosa cancellare.');return;}for(const k of on){if(k==='lib')await clearLib();else CLEAR[k]();}
+  document.querySelectorAll('.cl').forEach(c=>{c.checked=false;});setMsg('Cancellato.');};
+$('#clall').onclick=()=>{if(!confirm('Cancellare tutto: brano, testo, titolo, artista, risultati e sincronizzazione? (La libreria resta, si cancella dalla sua casella.)'))return;
+  Object.values(CLEAR).forEach(f=>f());setMsg('Tutto cancellato.');};
+</script></body></html>

@@ -1,0 +1,14 @@
+name: Build EXE Windows
+on: [workflow_dispatch]
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - run: pip install -r requirements.txt pyinstaller
+      - run: pyinstaller --noconfirm --onedir --console --name SirJoeSyncroSong --add-data "static;static" --collect-data whisper --collect-submodules stable_whisper --hidden-import tiktoken_ext.openai_public --hidden-import tiktoken_ext run_app.py
+      - uses: actions/upload-artifact@v4
+        with: { name: SirJoeSyncroSong-windows, path: dist/SirJoeSyncroSong }

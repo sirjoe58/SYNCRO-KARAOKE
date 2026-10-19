@@ -1,0 +1,91 @@
+name: Crea versioni installabili
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            name: Windows
+          - os: macos-latest
+            name: Mac-AppleSilicon
+          - os: macos-15-intel
+            name: Mac-Intel
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Dipendenze
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            pip install torch --index-url https://download.pytorch.org/whl/cpu
+          else
+            pip install torch
+          fi
+          pip install -r requirements.txt pyinstaller static-ffmpeg
+      - name: Scarica ffmpeg e ffprobe
+        shell: bash
+        run: |
+          python -c "import static_ffmpeg.run as r, shutil, os; f,p=r.get_or_fetch_platform_executables_else_raise(); os.makedirs('ffbin',exist_ok=True); shutil.copy(f,'ffbin'); shutil.copy(p,'ffbin'); print(os.listdir('ffbin'))"
+      - name: Compila
+        shell: bash
+        run: |
+          SEP=":"; [ "${{ runner.os }}" = "Windows" ] && SEP=";"
+          pyinstaller --noconfirm --onedir --console --name SirJoeKaraoke \
+            --add-data "static${SEP}static" \
+            --collect-data whisper --collect-data stable_whisper --collect-submodules stable_whisper \
+            --collect-all demucs_infer --collect-all yt_dlp \
+            --hidden-import tiktoken_ext.openai_public --hidden-import tiktoken_ext \
+            run_app.py
+          mkdir -p dist/SirJoeKaraoke/bin
+          cp ffbin/* dist/SirJoeKaraoke/bin/
+          cp README.md dist/SirJoeKaraoke/LEGGIMI.md
+      - name: Avvio per Mac
+        if: runner.os == 'macOS'
+        run: |
+          cat > dist/SirJoeKaraoke/Avvia-SirJoe.command <<'EOF'
+          #!/bin/bash
+          cd "$(dirname "$0")"
+          xattr -dr com.apple.quarantine . 2>/dev/null
+          ./SirJoeKaraoke
+          EOF
+          chmod +x dist/SirJoeKaraoke/Avvia-SirJoe.command dist/SirJoeKaraoke/SirJoeKaraoke dist/SirJoeKaraoke/bin/*
+      - name: Prova di avvio
+        shell: bash
+        run: |
+          cd dist/SirJoeKaraoke
+          (./SirJoeKaraoke > out.log 2>&1 &)
+          for i in $(seq 1 40); do curl -sf http://127.0.0.1:8000/api/selftest && exit 0; sleep 3; done
+          cat out.log; exit 1
+      - name: Archivio
+        shell: bash
+        run: |
+          rm -f dist/SirJoeKaraoke/out.log
+          cd dist
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            7z a ../SirJoeKaraoke-${{ matrix.name }}.zip SirJoeKaraoke
+          else
+            ditto -c -k --sequesterRsrc --keepParent SirJoeKaraoke ../SirJoeKaraoke-${{ matrix.name }}.zip
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SirJoeKaraoke-${{ matrix.name }}
+          path: SirJoeKaraoke-${{ matrix.name }}.zip
+      - name: Pubblica nella Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: SirJoeKaraoke-${{ matrix.name }}.zip
