@@ -121,6 +121,6 @@ Le modifiche valgono per i video e i file che salvi dopo; con «Salva le modific
 ## Versioni installabili (Windows e Mac)
 Dalla pagina **Releases** del repository scarichi:
 - `SirJoeKaraoke-Windows.zip` → estrai, doppio clic su `SirJoeKaraoke.exe` (se Windows avvisa: "Ulteriori informazioni" → "Esegui comunque").
-- `SirJoeKaraoke-Mac-AppleSilicon.zip` (Mac M1/M2/M3/M4) oppure `SirJoeKaraoke-Mac-Intel.zip` → estrai, doppio clic su `Avvia-SirJoe.command` (la prima volta: clic destro → Apri).
+- `SirJoeKaraoke-Mac-AppleSilicon.zip` (Mac M1/M2/M3/M4; per i Mac Intel si avvia da sorgente con `avvia-mac.command`) → estrai, doppio clic su `Avvia-SirJoe.command` (la prima volta: clic destro → Apri).
 ffmpeg è già incluso. La libreria si salva nella cartella `SirJoe Karaoke Libreria` dentro la tua cartella utente. I modelli di riconoscimento vocale si scaricano al primo uso (serve internet). Per scaricare da YouTube serve anche Deno.
 Le versioni si creano da sole con GitHub Actions (`.github/workflows/build.yml`) quando si pubblica un tag, ad esempio `v3.7`.
