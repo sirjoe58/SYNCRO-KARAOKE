@@ -1,0 +1,9 @@
+fastapi>=0.110
+uvicorn[standard]>=0.29
+python-multipart>=0.0.9
+stable-ts>=2.17
+# Download da YouTube e altri siti (YouTube richiede anche Deno: winget install DenoLand.Deno)
+yt-dlp[default]
+# Separazione della voce (Demucs, versione "inference-only" compatibile con PyTorch 2.x)
+demucs-infer
+# PyTorch viene installato a parte (versione CPU leggera) da avvia.bat / Dockerfile
