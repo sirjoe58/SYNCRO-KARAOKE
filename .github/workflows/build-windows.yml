@@ -11,4 +11,4 @@ jobs:
       - run: pip install -r requirements.txt pyinstaller
       - run: pyinstaller --noconfirm --onedir --console --name SirJoeSyncroSong --add-data "static;static" --collect-data whisper --collect-submodules stable_whisper --hidden-import tiktoken_ext.openai_public --hidden-import tiktoken_ext run_app.py
       - uses: actions/upload-artifact@v4
-        with: { name: SirJoeSyncroSong-windows, path: dist/SirJoeSyncroSong }
+        with: { name: SirJoeSyncroSong-windows, path: dist/SirJoeSyncroSong, retention-days: 7 }

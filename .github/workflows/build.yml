@@ -16,8 +16,6 @@ jobs:
         include:
           - os: windows-latest
             name: Windows
-          - os: macos-latest
-            name: Mac-AppleSilicon
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -82,6 +80,7 @@ jobs:
         with:
           name: SirJoeKaraoke-${{ matrix.name }}
           path: SirJoeKaraoke-${{ matrix.name }}.zip
+          retention-days: 7
       - name: Pubblica nella Release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
